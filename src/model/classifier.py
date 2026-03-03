@@ -20,7 +20,7 @@ class SafetyClassifier:
         self,
         model_name: str = "Qwen/Qwen3.5-9B",
         adapter_path: str | None = None,
-        device: str = "cuda",
+        device: str = "auto",
         dtype: torch.dtype = torch.bfloat16,
     ):
         self.device = device
@@ -81,7 +81,7 @@ class SafetyClassifier:
             images=[image],
             return_tensors="pt",
             padding=True,
-        ).to(self.device)
+        ).to(self.model.device)
 
         output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
         new_tokens = output_ids[0][inputs["input_ids"].shape[1] :]
