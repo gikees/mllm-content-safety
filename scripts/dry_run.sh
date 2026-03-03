@@ -14,6 +14,7 @@ cd ~/mllm-content-safety
 export PATH="$HOME/miniconda3/bin:$PATH"
 eval "$(conda shell.bash hook)"
 conda activate mllm-content-safety
+export PYTHONPATH="$PWD:$PYTHONPATH"
 
 # 1. Download data
 echo "[1/4] Downloading datasets..."

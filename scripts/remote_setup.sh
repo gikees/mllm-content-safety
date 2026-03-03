@@ -30,6 +30,7 @@ fi
 export PATH="$HOME/miniconda3/bin:$PATH"
 eval "$(conda shell.bash hook)"
 conda activate mllm-content-safety
+export PYTHONPATH="$PWD:$PYTHONPATH"
 
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 pip install transformers datasets peft accelerate trl \
