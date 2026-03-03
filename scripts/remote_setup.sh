@@ -1,8 +1,11 @@
 #!/bin/bash
 # Full pipeline for remote GPU server
-# Usage: ssh egor69.30.0.74 'bash -s' < scripts/remote_setup.sh
+# Usage: ssh egor@69.30.0.75 'bash -s' < scripts/remote_setup.sh
 #    OR: scp to remote, then run: bash remote_setup.sh
 set -e
+
+# Use GPU 1 (GPU 0 is occupied)
+export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-7}
 
 echo "========================================="
 echo " MLLM Content Safety - Remote Setup"
