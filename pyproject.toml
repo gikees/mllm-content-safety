@@ -1,0 +1,32 @@
+[project]
+name = "mllm-content-safety"
+version = "0.1.0"
+description = "Multimodal content safety classifier with Chain-of-Thought reasoning using Qwen3.5-9B"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.4.0",
+    "transformers>=4.48.0",
+    "datasets>=3.0.0",
+    "peft>=0.14.0",
+    "accelerate>=1.2.0",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.5.0",
+    "wandb>=0.19.0",
+    "trl>=0.14.0",
+]
+
+[project.optional-dependencies]
+unsloth = ["unsloth>=2025.3"]
+dev = ["ruff", "pytest", "ipykernel"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100

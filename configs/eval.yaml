@@ -1,0 +1,11 @@
+evaluation:
+  few_shot_k: [0, 1, 2, 4, 8]
+  risk_thresholds: [0.3, 0.5, 0.7, 0.9]
+  holdout_categories: ["disability", "nationality"]  # held out for generalization test
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "auroc"
+  batch_size: 8
