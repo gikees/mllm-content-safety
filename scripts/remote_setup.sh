@@ -27,6 +27,7 @@ if ! conda env list | grep -q "mllm-content-safety"; then
     conda create -n mllm-content-safety python=3.11 -y
 fi
 
+export PATH="$HOME/miniconda3/bin:$PATH"
 eval "$(conda shell.bash hook)"
 conda activate mllm-content-safety
 
