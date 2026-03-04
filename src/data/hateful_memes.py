@@ -1,13 +1,13 @@
 """HatefulMemes dataset loader.
 
-Loads the Facebook HatefulMemes dataset from HuggingFace and formats it
-for multimodal conversation-style training with Qwen3.5.
+Loads the HatefulMemes dataset from HuggingFace (Multimodal-Fatima version
+with embedded PIL images) and formats it for multimodal conversation-style
+training with Qwen3.5.
 """
 
 from datasets import load_dataset
-from PIL import Image
 
-DATASET_ID = "neuralcatcher/hateful_memes"
+DATASET_ID = "Multimodal-Fatima/Hatefulmemes_train"
 
 
 def load_hateful_memes(split: str = "train") -> list[dict]:
