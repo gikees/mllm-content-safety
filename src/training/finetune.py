@@ -4,15 +4,19 @@ Uses Unsloth for memory-efficient fine-tuning on a single A100.
 Falls back to HuggingFace PEFT + TRL if Unsloth is not available.
 """
 
+import json
 import yaml
 import argparse
 from pathlib import Path
 
 import torch
-from datasets import Dataset
+from datasets import Dataset, load_dataset
 from transformers import AutoModelForImageTextToText, AutoProcessor
 from peft import LoraConfig, get_peft_model, TaskType
 from trl import SFTTrainer, SFTConfig
+
+from src.data.cot_templates import ANNOTATION_PROMPT
+from src.data.preprocessing import create_splits
 
 
 def load_configs(
@@ -55,12 +59,35 @@ def setup_model(model_cfg: dict) -> tuple:
 
 
 def load_training_data(data_path: str = "data/train_cot.jsonl") -> Dataset:
-    """Load pre-processed training data with CoT annotations.
+    """Load CoT annotations and re-associate with images from the dataset.
 
-    Expects a JSONL file where each line has a 'messages' key
-    in the Qwen3.5 conversation format.
+    The JSONL stores text-only CoT records with an index field.
+    Images are loaded from the original HuggingFace dataset.
     """
-    return Dataset.from_json(data_path)
+    # Load the original dataset for images
+    hf_ds = load_dataset("Multimodal-Fatima/Hatefulmemes_train", split="train")
+    splits = create_splits([{"label": row["label"]} for row in hf_ds])
+    train_indices = list(range(len(splits["train"])))
+
+    # Load CoT annotations
+    with open(data_path) as f:
+        cot_records = [json.loads(line) for line in f]
+
+    # Build training samples with conversation format
+    samples = []
+    for record in cot_records:
+        idx = record["index"]
+        row = hf_ds[idx]
+        prompt = ANNOTATION_PROMPT + f'\nThe text reads: "{record["text"]}"'
+        # Store as text-only conversation (images handled by collator)
+        samples.append({
+            "messages": json.dumps([
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": record["cot"]},
+            ]),
+        })
+
+    return Dataset.from_list(samples)
 
 
 def train(

@@ -24,6 +24,10 @@ python scripts/download_data.py
 echo "[2/4] Generating CoT (10 samples)..."
 python scripts/generate_cot.py --max-samples 10
 
+echo "  Checking output..."
+wc -l data/train_cot.jsonl
+head -1 data/train_cot.jsonl
+
 # 3. Train for 1 step
 echo "[3/4] Training (1 step sanity check)..."
 python -c "
@@ -33,6 +37,7 @@ from trl import SFTTrainer, SFTConfig
 model_cfg, train_cfg = load_configs()
 model, processor = setup_model(model_cfg)
 dataset = load_training_data('data/train_cot.jsonl')
+print(f'Dataset size: {len(dataset)}')
 
 args = SFTConfig(
     output_dir='checkpoints/dry_run',
@@ -57,17 +62,11 @@ echo "[4/4] Testing inference..."
 python -c "
 from src.model.classifier import SafetyClassifier
 from src.model.risk_ranker import RiskRanker
-from PIL import Image
-import json
-
-# Load first sample to get an image
-with open('data/train.jsonl') as f:
-    sample = json.loads(f.readline())
+from datasets import load_dataset
 
 classifier = SafetyClassifier.from_config(adapter_path='checkpoints/dry_run')
-# Test with a dummy image since jsonl doesn't store images directly
-from datasets import load_dataset
-ds = load_dataset('neuralcatcher/hateful_memes', split='train[:1]')
+
+ds = load_dataset('Multimodal-Fatima/Hatefulmemes_train', split='train[:1]')
 pred = classifier.predict(ds[0]['image'], ds[0].get('text', 'test'))
 
 ranker = RiskRanker()

@@ -39,3 +39,8 @@
 - **Status**: Fixed
 - **Cause**: transformers 4.57.2 didn't recognize `qwen3_5` model type
 - **Fix**: `pip install --upgrade transformers` → 5.3.0
+
+## Issue 9: PIL Image not JSON serializable in CoT generation
+- **Status**: Fixed
+- **Cause**: `format_for_training()` embedded PIL images in the output dict, which can't be serialized to JSONL
+- **Fix**: Save only text/CoT/metadata to JSONL with an `index` field. Images are re-loaded from HuggingFace dataset at training time.

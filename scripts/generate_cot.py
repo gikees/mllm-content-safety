@@ -43,8 +43,15 @@ def main():
             try:
                 pred = classifier.predict(sample["image"], sample["text"])
                 cot = pred["reasoning"]
-                formatted = format_for_training(sample, cot=cot)
-                f.write(json.dumps(formatted) + "\n")
+                record = {
+                    "index": i,
+                    "text": sample["text"],
+                    "label": sample["label"],
+                    "cot": cot,
+                    "classification": pred["classification"],
+                    "severity": pred["severity"],
+                }
+                f.write(json.dumps(record) + "\n")
                 annotated += 1
 
                 if (i + 1) % 10 == 0:
