@@ -7,7 +7,7 @@ with Chain-of-Thought reasoning output.
 import torch
 import yaml
 from pathlib import Path
-from transformers import AutoModelForCausalLM, AutoProcessor
+from transformers import AutoModelForImageTextToText, AutoProcessor
 from peft import PeftModel
 
 from src.data.cot_templates import COT_SYSTEM_PROMPT, ANNOTATION_PROMPT, parse_cot_response
@@ -25,9 +25,9 @@ class SafetyClassifier:
     ):
         self.device = device
         self.processor = AutoProcessor.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(
+        self.model = AutoModelForImageTextToText.from_pretrained(
             model_name,
-            torch_dtype=dtype,
+            dtype=dtype,
             device_map=device,
         )
 

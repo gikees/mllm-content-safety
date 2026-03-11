@@ -10,7 +10,7 @@ from pathlib import Path
 
 import torch
 from datasets import Dataset
-from transformers import AutoModelForCausalLM, AutoProcessor
+from transformers import AutoModelForImageTextToText, AutoProcessor
 from peft import LoraConfig, get_peft_model, TaskType
 from trl import SFTTrainer, SFTConfig
 
@@ -33,9 +33,9 @@ def setup_model(model_cfg: dict) -> tuple:
     dtype = dtype_map.get(model_cfg["model"].get("dtype", "bfloat16"), torch.bfloat16)
 
     processor = AutoProcessor.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
+    model = AutoModelForImageTextToText.from_pretrained(
         model_name,
-        torch_dtype=dtype,
+        dtype=dtype,
         device_map="auto",
     )
 
