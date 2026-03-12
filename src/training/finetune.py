@@ -110,7 +110,7 @@ def train(
         learning_rate=t["learning_rate"],
         warmup_ratio=t["warmup_ratio"],
         weight_decay=t["weight_decay"],
-        max_seq_length=t["max_seq_length"],
+        max_length=t["max_length"],
         gradient_checkpointing=t["gradient_checkpointing"],
         logging_steps=t["logging_steps"],
         save_steps=t["save_steps"],
