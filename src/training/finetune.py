@@ -73,18 +73,23 @@ def load_training_data(data_path: str = "data/train_cot.jsonl") -> Dataset:
     with open(data_path) as f:
         cot_records = [json.loads(line) for line in f]
 
-    # Build training samples with conversation format
+    # Build training samples with images and conversation format
     samples = []
     for record in cot_records:
         idx = record["index"]
         row = hf_ds[idx]
-        prompt = ANNOTATION_PROMPT + f'\nThe text reads: "{record["text"]}"'
-        # Store as text-only conversation (images handled by collator)
         samples.append({
-            "messages": json.dumps([
-                {"role": "user", "content": prompt},
-                {"role": "assistant", "content": record["cot"]},
-            ]),
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image"},
+                        {"type": "text", "text": ANNOTATION_PROMPT + f'\nThe text reads: "{record["text"]}"'},
+                    ],
+                },
+                {"role": "assistant", "content": [{"type": "text", "text": record["cot"]}]},
+            ],
+            "images": [row["image"]],
         })
 
     return Dataset.from_list(samples)
