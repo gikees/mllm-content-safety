@@ -13,12 +13,22 @@ from src.data.hateful_memes import load_hateful_memes, format_for_training
 from src.data.preprocessing import create_splits
 
 
+def ground_truth_label(label: int) -> str:
+    """Convert numeric label to classification string."""
+    return "unsafe" if label == 1 else "safe"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-config", default="configs/model.yaml")
     parser.add_argument("--output", default="data/train_cot.jsonl")
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--device", default="auto")
+    parser.add_argument(
+        "--discard-mismatches",
+        action="store_true",
+        help="Discard samples where model disagrees with ground truth instead of correcting them",
+    )
     args = parser.parse_args()
 
     print("Loading model for CoT generation...")
@@ -38,18 +48,43 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     annotated = 0
+    agreed = 0
+    disagreed = 0
+    discarded = 0
+
     with open(output_path, "w") as f:
         for i, sample in enumerate(train_samples):
             try:
                 pred = classifier.predict(sample["image"], sample["text"])
                 cot = pred["reasoning"]
+                pred_cls = pred["classification"]
+                gt_cls = ground_truth_label(sample["label"])
+
+                if pred_cls == gt_cls:
+                    agreed += 1
+                    classification = pred_cls
+                else:
+                    disagreed += 1
+                    if args.discard_mismatches:
+                        discarded += 1
+                        if (i + 1) % 10 == 0:
+                            print(f"  Annotated {i + 1}/{len(train_samples)} samples")
+                        continue
+                    # Override classification to match ground truth
+                    classification = gt_cls
+                    cot += (
+                        f"\n[Note: Model predicted '{pred_cls}' but ground truth "
+                        f"label is '{gt_cls}'. Classification corrected to '{gt_cls}'.]"
+                    )
+
                 record = {
                     "index": i,
                     "text": sample["text"],
                     "label": sample["label"],
                     "cot": cot,
-                    "classification": pred["classification"],
+                    "classification": classification,
                     "severity": pred["severity"],
+                    "gt_agreed": pred_cls == gt_cls,
                 }
                 f.write(json.dumps(record) + "\n")
                 annotated += 1
@@ -61,6 +96,15 @@ def main():
                 print(f"  Error on sample {i}: {e}")
                 continue
 
+    total = agreed + disagreed
+    print(f"\n--- Ground Truth Validation ---")
+    print(f"Total processed: {total}")
+    print(f"Agreed with ground truth: {agreed} ({agreed / total * 100:.1f}%)" if total else "")
+    print(f"Disagreed with ground truth: {disagreed} ({disagreed / total * 100:.1f}%)" if total else "")
+    if args.discard_mismatches:
+        print(f"Discarded (mismatches): {discarded}")
+    else:
+        print(f"Corrected (mismatches): {disagreed}")
     print(f"Saved {annotated} annotated samples to {output_path}")
 
 

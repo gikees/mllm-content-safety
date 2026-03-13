@@ -53,7 +53,7 @@ class SafetyClassifier:
         )
 
     @torch.inference_mode()
-    def predict(self, image, text: str, max_new_tokens: int = 512) -> dict:
+    def predict(self, image, text: str, max_new_tokens: int = 1024) -> dict:
         """Run safety classification on an image + text pair.
 
         Args:
@@ -96,7 +96,7 @@ class SafetyClassifier:
         }
 
     @torch.inference_mode()
-    def predict_batch(self, samples: list[dict], max_new_tokens: int = 512) -> list[dict]:
+    def predict_batch(self, samples: list[dict], max_new_tokens: int = 1024) -> list[dict]:
         """Run classification on a batch of samples.
 
         Args:
